@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Limiting Example</title>
+</head>
+<body>
+    <h1>Rate Limiting Test</h1>
+    <button id="sendRequestBtn">Send Request</button>
+   
+    <div id="responseDisplay"></div>
+
+
+    <script>
+        document.getElementById("sendRequestBtn").addEventListener("click", function() {
+            const responseDisplay = document.getElementById("responseDisplay");
+
+
+            // Send a single request
+            fetch('http://localhost:3000/api/test', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                // Retrieve headers and display rate-limiting info
+                const rateLimit = response.headers.get('X-Ratelimit-Limit');
+                const remaining = response.headers.get('X-Ratelimit-Remaining');
+                const retryAfter = response.headers.get('X-Ratelimit-Retry-After');
+
+
+                // Convert response to JSON and display
+                return response.json().then(data => {
+                    // Display response message
+                    responseDisplay.innerHTML = `<p>Response: ${data.message}</p>`;
+
+
+                    // Display rate-limiting headers
+                    responseDisplay.innerHTML += `<p>Rate Limit: ${rateLimit}</p>`;
+                    responseDisplay.innerHTML += `<p>Remaining Requests: ${remaining}</p>`;
+
+
+                    if (retryAfter) {
+                        responseDisplay.innerHTML += `<p>Retry After: ${retryAfter} seconds</p>`;
+                    }
+
+
+                    responseDisplay.innerHTML += '<hr>';
+                });
+            })
+            .catch(error => {
+                responseDisplay.innerHTML = `<p>Error: ${error}</p><hr>`;
+            });
+        });
+    </script>
+</body>
+</html>
